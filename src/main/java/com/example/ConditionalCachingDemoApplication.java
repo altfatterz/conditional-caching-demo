@@ -1,6 +1,5 @@
 package com.example;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +12,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKey;
-import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
@@ -42,7 +39,12 @@ class CustomerRestController {
 
     @GetMapping("/customer")
     public Customer getCustomer() {
-        return customerService.findOne();
+        return customerService.findOne1();
+    }
+
+    @GetMapping("/customer2")
+    public Customer getCustomer2() {
+        return customerService.findOne2();
     }
 
 }
@@ -64,8 +66,14 @@ class CustomKeyGenerator implements KeyGenerator {
 @CacheConfig(keyGenerator = "customKeyGenerator")
 class CustomerService {
 
-    @Cacheable(value = "customers", unless = "@monitoring.skipCaching()")
-    public Customer findOne() {
+    @Cacheable(value = "customers", unless = "@monitoring.monitoringUser()")
+    public Customer findOne1() {
+        log.info("CustomerService was called");
+        return new Customer("customer");
+    }
+
+    @Cacheable(value = "customers", condition = "!@monitoring.monitoringUser()")
+    public Customer findOne2() {
         log.info("CustomerService was called");
         return new Customer("customer");
     }
@@ -78,7 +86,7 @@ class Monitoring {
     @Value("${caching.disable.users:#{T(java.util.Collections).emptyList()}}")
     private List<String> users;
 
-    public boolean skipCaching() {
+    public boolean monitoringUser() {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // do not cache
