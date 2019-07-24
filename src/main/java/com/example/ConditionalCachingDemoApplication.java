@@ -64,10 +64,10 @@ class CustomKeyGenerator implements KeyGenerator {
 @CacheConfig(keyGenerator = "customKeyGenerator")
 class CustomerService {
 
-    @Cacheable(value = "customers", unless = "@monitoring.isMonitoringUser()")
+    @Cacheable(value = "customers", unless = "@monitoring.skipCaching()")
     public Customer findOne() {
         log.info("CustomerService was called");
-        return new Customer("John Doe");
+        return new Customer("customer");
     }
 }
 
@@ -78,7 +78,7 @@ class Monitoring {
     @Value("${caching.disable.users:#{T(java.util.Collections).emptyList()}}")
     private List<String> users;
 
-    public boolean isMonitoringUser() {
+    public boolean skipCaching() {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // do not cache
