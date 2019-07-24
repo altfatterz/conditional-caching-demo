@@ -1,0 +1,21 @@
+logging:
+  level:
+    org.springframework.cache: trace
+    com.github.benmanes.caffeine: trace
+
+jwt.secret: demo
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+
+caching:
+  disable:
+    users: bean, hancock
+
+spring:
+  cache:
+    type: caffeine
